@@ -12,7 +12,7 @@ description: |
   主力行为、筹码集中度、横向对比几只票。
 description_zh: "A 股个股深度分析 P0–P7 标准流程 v4.6：数据闸门 + 三级缠论 + 五条财务口径规则（分母污染/PE-PB 背离/EV 扣合同负债）+ 赔率四口径 + 进场退出 + Jev 自洽检查"
 description_en: "A-share single-stock deep-dive pipeline v4.6 (P0-P7): data gate, tri-timeframe Chan structure, five financial-caliber rules (denominator contamination, PE/PB divergence, EV net of contract liabilities), multi-caliber odds, entry/exit triggers, semantic consistency check"
-version: 1.0.0
+version: 1.1.0
 allowed-tools: Bash,Read,Write,Edit,Grep,Glob
 agent_created: true
 ---
@@ -79,6 +79,7 @@ agent_created: true
 
 | 你正在做 | 打开 |
 |---|---|
+| 想知道方法论章节地图、各阶段耗时与目的 | `references/nav-overview.md` |
 | 判定标的是否可分析、P0 分红对账、P1 池子、P2 缠论三级 | `references/pipeline-p0-p2.md` |
 | 读财报、算估值、判分母是否被污染、EV、营运资本、一致预期 | `references/pipeline-p3-fundamentals.md` |
 | 业绩归因、主力行为八问、赔率四口径、进场触发、退出规则 | `references/pipeline-p4-p5.md` |
@@ -119,5 +120,7 @@ agent_created: true
   缠论原理讲解走 `czsc-thinking`——不要在本 skill 里重复实现它们。
 - 环境路径、MCP 工具清单、本地脚本清单见 `references/data-interfaces.md`；
   skill 的设计意图与触发边界见 `SPEC.md`，references 的切分映射与再生成方法见 `SOURCES.md`。
-- 维护：方法论升版后跑 `scripts/rebuild_references.py` 重新切分，**不要手工逐段复制**——
-  手工复制必然漏段，且数值容易被顺手改错。改完跑 `scripts/check_tables.py` 复验。
+- 维护：方法论升版后跑 `scripts/release.py`（版本校验 → 重新切分 → 断表校验 → 备份完整性验证 → 提交），
+  **不要手工逐段复制**——手工复制必然漏段，且数值容易被顺手改错。
+- 本仓库同时是方法论文档的**备份**：`scripts/merge_references.py` 可从 references 反向重建完整文档，
+  已通过内容级一致性验证。原始文档丢失时用它还原，别再靠会话快照抢救。
