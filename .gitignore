@@ -1,0 +1,29 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# --- 凭据：绝不入库 ---
+.env
+.env.*
+*.key
+*_key.txt
+
+# --- 运行时缓存 / 本地数据 ---
+_cache/
+_state/
+*.pkl
+*.log
+
+# --- 编辑器 / 系统 ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- 生成物 ---
+# 个股分析报告属运行时产出，仓库只保留方法论文档
+*_个股分析_*.md
