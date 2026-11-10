@@ -12,7 +12,7 @@ description: |
   主力行为、筹码集中度、横向对比几只票。
 description_zh: "A 股个股深度分析 P0–P7 标准流程 v4.6：数据闸门 + 三级缠论 + 五条财务口径规则（分母污染/PE-PB 背离/EV 扣合同负债）+ 赔率四口径 + 进场退出 + Jev 自洽检查"
 description_en: "A-share single-stock deep-dive pipeline v4.6 (P0-P7): data gate, tri-timeframe Chan structure, five financial-caliber rules (denominator contamination, PE/PB divergence, EV net of contract liabilities), multi-caliber odds, entry/exit triggers, semantic consistency check"
-version: 1.1.0
+version: 1.2.0
 allowed-tools: Bash,Read,Write,Edit,Grep,Glob
 agent_created: true
 ---

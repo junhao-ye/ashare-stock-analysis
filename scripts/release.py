@@ -11,7 +11,9 @@
     python release.py                                  # 只检查，不改仓库
     python release.py --commit -m "feat: 升到 v4.7"      # 检查全过后提交
     python release.py --commit -m "..." --push          # 再推送到 origin
-    python release.py --src <文档.md>                    # 指定源文档
+    python release.py --export "C:/Users/me/Desktop/个股分析流程.md"
+                                                       # 全过后导出桌面副本
+    python release.py --src <文档.md>                    # 指定源文档（默认＝仓库根那份）
 
 退出码：0 全通过 / 1 有步骤失败 / 2 环境问题（文档或目录缺失）
 """
@@ -87,7 +89,8 @@ def run(cmd: list[str]) -> tuple[bool, str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="迭代收尾流水线")
-    ap.add_argument("--src", default=str(rb.DEFAULT_SRC), help="方法论文档路径")
+    ap.add_argument("--src", default=str(rb.DEFAULT_SRC), help="方法论文档路径（默认＝仓库根那份）")
+    ap.add_argument("--export", metavar="目标路径", help="全部通过后把权威文档导出到该路径（如桌面副本）")
     ap.add_argument("--commit", action="store_true", help="检查全过后提交")
     ap.add_argument("-m", "--message", help="提交信息（--commit 必填）")
     ap.add_argument("--push", action="store_true", help="提交后推送到 origin")
@@ -112,7 +115,11 @@ def main() -> int:
         print(f"{BAD} 切分失败：锚点不匹配通常意味着文档章节被改名/移动，需同步更新 SPEC 行号")
 
     step(3, total, "断表校验")
-    ok, out = run([py, str(HERE / "check_tables.py"), *[str(p) for p in sorted(REF_DIR.glob("*.md"))]])
+    # 权威正文与根目录文档也要查：断表最早就是从权威正文里长出来的（§9.2 那处）
+    targets = sorted(REF_DIR.glob("*.md")) + sorted(p for p in ROOT.glob("*.md") if p != src)
+    if src.exists():
+        targets.insert(0, src)
+    ok, out = run([py, str(HERE / "check_tables.py"), *[str(p) for p in targets]])
     print("\n".join(out.rstrip().splitlines()[-4:]))
     if not ok:
         failures.append("断表校验")
@@ -168,6 +175,13 @@ def main() -> int:
         print(f"{BAD} 未通过：{'、'.join(failures)}")
         return 1
     print(f"{OK} 全部通过：版本一致、references 已刷新、无断表、备份可还原")
+
+    if a.export:
+        target = Path(a.export)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        data = src.read_bytes().replace(b"\r\n", b"\n")
+        target.write_bytes(data)
+        print(f"{OK} 已导出到 {target}（{len(data)} 字节 / LF）")
     return 0
 
 

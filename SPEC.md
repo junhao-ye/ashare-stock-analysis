@@ -78,9 +78,10 @@ Out of scope：
 
 ```text
 ashare-stock-analysis/
+├── 个股分析流程.md                   ★ 方法论权威正文（v4.6，2120 行）；桌面副本是它的导出物
 ├── SKILL.md                        入口：铁律 / 适用范围 / 执行顺序 / 七道闸门 / 路由表 / 自检
 ├── SPEC.md                         本文件：设计意图、触发边界、证据模型、维护约定
-├── SOURCES.md                      provenance：内容从哪来、怎么重新生成
+├── SOURCES.md                      provenance：内容从哪来、正向/反向生成
 ├── CONTRIBUTING.md                 迭代手册：一次升版的标准动作、版本号规则、冲突处理
 ├── references/
 │   ├── nav-overview.md             文档结构 / 阶段总览（导航；保证备份完整）
@@ -103,9 +104,11 @@ ashare-stock-analysis/
 ```
 
 约定：
+- **权威正文是仓库根的 `个股分析流程.md`**；桌面副本与 `references/` 都是它的派生物，
+  两者的改动都不回流。改方法论只改权威正文。
 - `SKILL.md` 里出现的每个 `references/*.md` 与 `scripts/*.py` 都必须可直接找到；新增文件必须同步路由表。
 - references 只做"按查询需要聚焦"，不做主题大杂烩；文件名要能预测内容。
-- **数值改动只能来自源文档升版后重跑 `rebuild_references.py`**，不允许在 references 里手改数字。
+- **数值改动只能来自权威正文改完后重跑 `rebuild_references.py`**，不允许在 references 里手改数字。
 - **切分边界只在 `rebuild_references.py` 的 `SPEC` 里定义一次**；`merge_references.py` 与 `release.py`
   都从它导入，避免三份行号各自漂移。
 
@@ -123,11 +126,14 @@ ashare-stock-analysis/
 
 ## Maintenance
 
-- **源文档升版**（v4.6 → v4.7）：更新 `scripts/rebuild_references.py` 里的 SPEC 行号与锚点 → 重跑 →
-  跑 `check_tables.py` → 手改 SKILL.md 中受影响的闸门/坑位描述 → 升 `version`。
-- **新增闸门**：先写进 references 对应阶段，再在 SKILL.md §3 表里加一行，两处必须同步。
+- **权威正文升版**（v4.6 → v4.7）：改仓库根的 `个股分析流程.md` → 改标题版本号 →
+  `release.py --commit --push --export <桌面路径>`。它会串起版本校验、SPEC 重切、断表校验、
+  备份回填验证与导出；SPEC 行号若因章节增删而移动，需先手工更新那双重定位锚点。
+- **新增闸门**：先写进权威正文对应阶段，再在 SKILL.md §3 表里加一行，两处必须同步
+  （references 由正文生成，所以只改正文即可，但 SKILL.md 的手写摘要要跟上）。
 - **新增参考文件**：必须有明确的"何时打开"，并在 §4 路由表登记，否则不新增。
-- **数值纪律**：references 中的数字只能由脚本从源文档带入；人工编辑只允许改标题层级与导读行。
+- **数值纪律**：references 中的数字只能由脚本从权威正文带入；人工编辑只允许改标题层级与导读行。
+- **桌面副本**：只由 `--export` 生成。手改桌面那份等于改了一份会被下次导出覆盖的临时文件。
 
 ## Open Gaps
 

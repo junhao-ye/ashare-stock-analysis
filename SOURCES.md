@@ -7,12 +7,17 @@
 | 项 | 值 |
 |---|---|
 | 文件 | `个股分析流程.md`（v4.6） |
-| 位置 | 桌面（本机） |
-| 规模 | 2120 行 / 151,289 字节 / 60 张表 |
+| **位置（权威）** | **本仓库根目录** |
+| 桌面副本 | 导出物，不是权威。用 `release.py --export` 生成，不要直接改它 |
+| 规模 | 2120 行 / 149,169 字节（LF）/ 60 张表 |
 | 版本日期 | 2026-11-10 |
 | 演进 | v1（2026-10-11）→ v4.6（2026-11-10），约 30 只个股实盘校准 |
 
-该文档本身是本流程的唯一权威版本。skill 不发明新规则，只做切分、编排、加闸门与自检。
+该文档是这套流程的唯一权威版本。skill 不发明新规则，只做切分、编排、加闸门与自检。
+
+> **为什么权威放在仓库而不是桌面**：这份文档丢过两次，其中 v4.4 从未进入任何备份、不可恢复。
+> 放在仓库里，每一次改动都有 commit 记录、可 diff、可回滚；桌面那份只是方便阅读的导出。
+> 改文档请改仓库里这份，然后 `--export` 覆盖桌面。
 
 ## 切分映射（行号以 v4.6 为准）
 
@@ -41,7 +46,7 @@
 **正向（文档 → references）**
 
 ```bash
-python scripts/rebuild_references.py            # 默认源＝桌面那份文档
+python scripts/rebuild_references.py            # 默认源＝仓库根那份文档
 python scripts/rebuild_references.py --src <新版文档.md>
 python scripts/rebuild_references.py --dst <输出目录>
 ```
@@ -68,10 +73,12 @@ python scripts/merge_references.py --verify 个股分析流程.md     # 重建�
 **一次迭代的收尾**
 
 ```bash
-python scripts/release.py --commit -m "feat: 升到 v4.7" --push
+python scripts/release.py --commit -m "feat: 升到 v4.7" --push \
+  --export "C:/Users/mai_k/Desktop/个股分析流程.md"
 ```
 
 串联五步，任一步失败即中止：版本一致性 → 重新切分 → 断表校验 → 备份完整性验证 → 提交。
+`--export` 在全部通过后把权威文档覆盖到桌面副本（统一写 LF）。
 细节见 `CONTRIBUTING.md`。
 
 ## 溯源修正记录

@@ -19,7 +19,9 @@ import re
 import sys
 from pathlib import Path
 
-DEFAULT_SRC = Path(r"C:\Users\mai_k\Desktop\个股分析流程.md")
+# 权威源＝仓库根目录这份文档（不是桌面那份）。桌面副本是导出物，见 release.py --export。
+# 用仓库相对路径而非绝对路径，换机器/换目录不用改代码。
+DEFAULT_SRC = Path(__file__).resolve().parent.parent / "个股分析流程.md"
 DEFAULT_DST = Path(__file__).resolve().parent.parent / "references"
 
 lines: list[str] = []
