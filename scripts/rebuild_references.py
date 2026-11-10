@@ -167,7 +167,9 @@ def main() -> int:
             "",
         ]
         text = "\n".join(header + body).rstrip() + "\n"
-        (dst / fname).write_text(text, encoding="utf-8")
+        # newline="\n" 是必须的：Windows 上默认会把 \n 翻成 \r\n，
+        # 而 .gitattributes 要求 LF → 每次重跑都产生一排「diff 为空却显示已修改」的幽灵变更。
+        (dst / fname).write_text(text, encoding="utf-8", newline="\n")
         report.append((fname, len(text.splitlines()), len(text)))
 
     print(f"{'file':38s} {'lines':>6s} {'bytes':>8s}")

@@ -105,6 +105,16 @@ python scripts/merge_references.py -o 个股分析流程.md
 **换机器了**
 `data-interfaces.md` 与 `preflight.py` 含本机绝对路径，需改路径。其余文件与机器无关。
 
+**`git status` 显示一堆已修改，但 `git diff` 是空的**
+行尾问题。全局 `core.autocrlf=true` 会把检出写成 CRLF，而脚本生成的是 LF，两边对不上。
+本仓库已把本地 `core.autocrlf` 设为 `false`，并让脚本显式写 `newline="\n"`；若仍出现：
+
+```bash
+git add --renormalize .        # 按 .gitattributes 重写索引
+```
+
+这不是无害的噪声：一排"改了又没改"的文件会训练你忽略 `git status`，而真正的改动就是这么漏掉的。
+
 ---
 
 ## 提交信息约定

@@ -170,7 +170,7 @@ def main() -> int:
 
     text = merge(a.title)
     if a.out:
-        Path(a.out).write_text(text, encoding="utf-8")
+        Path(a.out).write_text(text, encoding="utf-8", newline="\n")
         print(f"已写入 {a.out}（{len(text.splitlines())} 行 / {len(text)} 字符 / {len(text.encode('utf-8'))} 字节）")
     elif not a.verify:
         sys.stdout.write(text)
