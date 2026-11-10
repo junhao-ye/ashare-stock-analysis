@@ -81,7 +81,9 @@ ashare-stock-analysis/
 ├── SKILL.md                        入口：铁律 / 适用范围 / 执行顺序 / 七道闸门 / 路由表 / 自检
 ├── SPEC.md                         本文件：设计意图、触发边界、证据模型、维护约定
 ├── SOURCES.md                      provenance：内容从哪来、怎么重新生成
+├── CONTRIBUTING.md                 迭代手册：一次升版的标准动作、版本号规则、冲突处理
 ├── references/
+│   ├── nav-overview.md             文档结构 / 阶段总览（导航；保证备份完整）
 │   ├── pipeline-p0-p2.md           P0 数据闸门 / P1 池交叉 / P2 三级缠论
 │   ├── pipeline-p3-fundamentals.md P3 五条口径规则 + 三道前置闸门
 │   ├── pipeline-p4-p5.md           P3.5 事件面 / P4 主力 / P5 赔率 / P5.5 进场 / P5.6 退出
@@ -95,23 +97,29 @@ ashare-stock-analysis/
 └── scripts/
     ├── preflight.py                开工前接口巡检（三探 + 环境自检 + dataAsOf 判定）
     ├── check_tables.py             Markdown 表格列数校验（断表检测）
-    └── rebuild_references.py       从源文档重新切分 references（维护用）
+    ├── rebuild_references.py       文档 → references 切分（SPEC 是行号的唯一定义处）
+    ├── merge_references.py         references → 文档 反向重建（备份可还原性验证）
+    └── release.py                  迭代收尾流水线：版本 → 切分 → 断表 → 回填验证 → 提交
 ```
 
 约定：
 - `SKILL.md` 里出现的每个 `references/*.md` 与 `scripts/*.py` 都必须可直接找到；新增文件必须同步路由表。
 - references 只做"按查询需要聚焦"，不做主题大杂烩；文件名要能预测内容。
-- 数值改动只能来自源文档升版后重跑 `rebuild_references.py`，不允许在 references 里手改数字。
+- **数值改动只能来自源文档升版后重跑 `rebuild_references.py`**，不允许在 references 里手改数字。
+- **切分边界只在 `rebuild_references.py` 的 `SPEC` 里定义一次**；`merge_references.py` 与 `release.py`
+  都从它导入，避免三份行号各自漂移。
 
 ## Validation
 
 1. `scripts/rebuild_references.py` 幂等：连续两次运行 md5 一致（已验证）。
-2. `scripts/check_tables.py references/*.md` → 56 张表 0 异常；源文档 60 张表 0 异常。
-3. `quick_validate.py` 结构校验通过（frontmatter、必填字段、被引用的文件存在）。
-4. `scripts/preflight.py` 在本机实测通过，并正确报出两源日期不一致。
-5. 触发精度：以上 8 条 should-trigger / 6 条 should-not-trigger 人工核对。
-6. 覆盖校验：源文档 2115 行中，除「文档结构」与「§1 总览」两张导航表被吸收进 SKILL.md 外，
-   其余全部落入 references，无遗漏章节。
+2. `scripts/check_tables.py references/*.md` → 60 张表 0 异常；源文档 60 张表 0 异常。
+3. **备份可还原（最关键）**：`scripts/merge_references.py --verify <原文档>` → 内容级一致，2112 有效行。
+   这是"skill 作为方法论备份"这条定位的唯一硬证据；没有它，references 只是碎片而非备份。
+4. `scripts/release.py` 五步全过（版本一致 / 切分成功 / 无断表 / 回填一致 / 仓库状态可读）。
+5. `quick_validate.py` 结构校验通过（frontmatter、必填字段、被引用的文件存在）。
+6. `scripts/preflight.py` 在本机实测通过，并正确报出两源日期不一致。
+7. 触发精度：以上 8 条 should-trigger / 6 条 should-not-trigger 人工核对。
+8. 覆盖校验：源文档 2120 行**全部**落入 references（含导航两段），无遗漏、无重复。
 
 ## Maintenance
 

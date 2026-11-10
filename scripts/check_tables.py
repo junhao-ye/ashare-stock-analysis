@@ -25,15 +25,17 @@ import sys
 from pathlib import Path
 
 SEP_CELL = re.compile(r"^:?-{1,}:?$")
+# 单元格里的 \| 是转义的竖线，不构成分列；只在未转义的 | 上切分
+SPLIT_RE = re.compile(r"(?<!\\)\|")
 
 
 def split_row(line: str) -> list[str]:
     s = line.strip()
     if s.startswith("|"):
         s = s[1:]
-    if s.endswith("|"):
+    if s.endswith("|") and not s.endswith("\\|"):
         s = s[:-1]
-    return [c for c in s.split("|")]
+    return [c.replace("\\|", "|") for c in SPLIT_RE.split(s)]
 
 
 def is_separator(line: str) -> bool:

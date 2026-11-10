@@ -109,8 +109,10 @@ python scripts/check_tables.py 报告.md
 ashare-stock-analysis/
 ├── SKILL.md              入口：铁律 / 适用范围 / P0–P7 执行顺序 / 七道闸门 / 路由表 / 8 项自检
 ├── SPEC.md               设计意图、触发边界（8 条正例 + 6 条负例）、证据模型、维护约定
-├── SOURCES.md            切分映射（文件 → 源行号）、再生成命令
-├── references/           按「你正在做什么」切分的 10 份深度知识
+├── SOURCES.md            切分映射（文件 → 源行号）、正向/反向生成命令
+├── CONTRIBUTING.md       迭代手册：一次升版的标准动作、版本号规则、故障处理
+├── references/           按「你正在做什么」切分的 11 份深度知识
+│   ├── nav-overview.md            章节地图 / 阶段耗时总览
 │   ├── pipeline-p0-p2.md          数据闸门 / 量化池交叉 / 日周月三级缠论
 │   ├── pipeline-p3-fundamentals.md 五条口径规则 + 三道前置闸门
 │   ├── pipeline-p4-p5.md          事件面 / 主力八问 / 赔率四口径 / 进场 / 退出
@@ -123,19 +125,67 @@ ashare-stock-analysis/
 │   └── known-gaps.md              已知不足（P0/P1/P2 三级）
 └── scripts/
     ├── preflight.py               开工前接口巡检
-    ├── check_tables.py            Markdown 表格列数校验
-    └── rebuild_references.py      从源文档重新切分 references（维护用）
+    ├── check_tables.py            表格列数校验（断表检测）
+    ├── rebuild_references.py      文档 → references（切分边界只在 SPEC 定义一次）
+    ├── merge_references.py        references → 文档（备份可还原性验证）
+    └── release.py                 迭代收尾流水线：版本 → 切分 → 断表 → 回填验证 → 提交
 ```
 
 ---
 
-## 两个设计取舍
+## 作为方法论备份
+
+本仓库同时是原始方法论文档的**备份**，而且这个承诺是可验证的，不是声称的：
+
+```bash
+python scripts/merge_references.py --verify 个股分析流程.md
+# ✅ 重建与原文档内容一致（2112 个有效行）
+#    备份可还原：references 未丢失任何章节。
+```
+
+`references` 里的 11 个片段按原始行号排序拼回，就得到一份完整文档。当前状态：**内容级一致**（仅章节边界空行数量可能有 1~2 行差异）。
+
+为什么在意这件事——这份文档此前**丢失过两次**，其中 v4.4 从未进入任何备份、不可恢复，只能凭报告里的实测数字重写。单靠会话快照抢救是不可靠的。
+
+源文档真的丢了的时候：
+
+```bash
+python scripts/merge_references.py -o 个股分析流程.md
+```
+
+## 快速迭代
+
+后续会频繁升版，所以把收尾动作收成了一条命令：
+
+```bash
+python scripts/release.py --commit -m "feat: 升到 v4.7" --push
+```
+
+五步串行，任一步失败立即中止，**绝不在失败状态下提交**（否则会留下一份坏备份）：
+
+| 步 | 检查 | 失败通常意味着 |
+|---|---|---|
+| 1 | 三处版本号一致（文档标题 / SKILL.md / SOURCES.md） | 改版本时漏了一处 |
+| 2 | 重新切分 references | 锚点不匹配 → 章节被改名，需更新 SPEC |
+| 3 | 断表校验 | 某行多写了一个 `\|` |
+| 4 | 备份完整性（refs → 文档回填比对） | 碎片已拼不回原文 |
+| 5 | 仓库状态 + 提交 | 工作区有意外变更 |
+
+**唯一铁律：数值只能从文档来，references 里的数字永远由脚本带入。** 手改的数字会在下次切分时被静默覆盖。
+完整迭代规则见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+## 三个设计取舍
 
 **1. references 逐字迁移，不重写。**
 方法论的核心资产是那些具体数字——「差 2.24 倍」「−0.44/−3.87/−6.20pt」「118→115 天」。概括会丢掉唯一能让人记住「为什么必须扣合同负债」的细节。所以正文机械切分、数值零改写，只新增标题层级和一行导读。
 
 **2. 切分用脚本，不手工复制。**
 2,100 行手工搬必然漏段，且数值容易被顺手改错。`scripts/rebuild_references.py` 按「行号 + 锚点文本」双重定位，锚点不符直接失败，不会静默错位；输出幂等（两次运行 md5 一致）。方法论升版后改 `SPEC` 里的边界重跑即可。
+
+**3. references 全量覆盖，不图省事。**
+最初把「文档结构」和「§1 总览」两段挪进 SKILL.md 就算了——反正 SKILL.md 有自己的改写版。
+但那样 references 就只是**碎片**，反向重建会缺两块，备份承诺就是空的。后来补了 `nav-overview.md`，
+现在 2120 行全部落位，`merge_references.py --verify` 才能逐行比对通过。
 
 ---
 
